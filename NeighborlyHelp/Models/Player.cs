@@ -1,12 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NeighborlyHelp.Models
+﻿namespace NeighborlyHelp.Models
 {
-    internal class Player
+    public class Player
     {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Speed { get; set; } = 5;
+        public string Name { get; set; } = "Игрок";
+
+        public Player(int startX, int startY)
+        {
+            X = startX;
+            Y = startY;
+        }
+
+        public void MoveUp() => Y -= Speed;
+        public void MoveDown() => Y += Speed;
+        public void MoveLeft() => X -= Speed;
+        public void MoveRight() => X += Speed;
     }
 }
