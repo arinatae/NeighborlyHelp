@@ -1,9 +1,11 @@
-﻿namespace NeighborlyHelp.Models
+﻿using System.Windows.Forms;
+
+namespace NeighborlyHelp.Models
 {
     public class GameField
     {
-        public int Width { get; set; } = 800;
-        public int Height { get; set; } = 600;
+        public int Width { get; set; } = Screen.PrimaryScreen.Bounds.Width;
+        public int Height { get; set; } = Screen.PrimaryScreen.Bounds.Height;
         public string BackgroundColor { get; set; } = "#87CEEB"; // Небесно-голубой
 
         // Проверка границ поля

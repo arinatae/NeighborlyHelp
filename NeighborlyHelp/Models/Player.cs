@@ -7,6 +7,9 @@
         public int Speed { get; set; } = 5;
         public string Name { get; set; } = "Игрок";
 
+        public int Width { get; set; } = 120;
+        public int Height { get; set; } = 120;
+
         public Player(int startX, int startY)
         {
             X = startX;

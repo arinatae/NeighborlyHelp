@@ -4,26 +4,48 @@ namespace NeighborlyHelp.Models
 {
     public class Bench : GameObject
     {
+        private Bitmap? sprite;
+
         public Bench(int x, int y)
         {
             X = x;
             Y = y;
-            Width = 40;
-            Height = 20;
-            Name = "Скамейка";
-            IsSolid = false; // На скамейку можно сесть, но она не стена
+
+            // Установи размеры зоны клика/столкновения под твою картинку.
+            // Если картинка больше, измени Width и Height здесь.
+            Width = 150;
+            Height = 100;
+
+            Name = "Bench";
+            IsSolid = false; // Скамейку нельзя проходить насквозь
+
+            // Загрузка PNG-картинки
+            try
+            {
+                sprite = new Bitmap("Assets/skameyka.png");
+            }
+            catch
+            {
+                sprite = null;
+            }
         }
 
         public override void Draw(Graphics g)
         {
-            // Коричневая скамейка
-            Brush benchBrush = new SolidBrush(Color.FromArgb(139, 69, 19));
-            g.FillRectangle(benchBrush, X, Y, Width, Height);
-
-            // Ножки скамейки
-            Pen legPen = new Pen(Color.FromArgb(101, 67, 33), 2);
-            g.DrawLine(legPen, X + 5, Y + Height, X + 5, Y + Height + 10);
-            g.DrawLine(legPen, X + Width - 5, Y + Height, X + Width - 5, Y + Height + 10);
+            if (sprite != null)
+            {
+                // Рисуем картинку скамейки
+                g.DrawImage(sprite, X, Y, Width, Height);
+            }
+            else
+            {
+                // Запасной вариант (если картинка не загрузилась)
+                // Рисуем коричневый прямоугольник
+                using (Brush b = new SolidBrush(Color.SaddleBrown))
+                {
+                    g.FillRectangle(b, X, Y, Width, Height);
+                }
+            }
         }
     }
 }
