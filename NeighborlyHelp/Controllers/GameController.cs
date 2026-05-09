@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
+using NeighborlyHelp.Services;
 
 namespace NeighborlyHelp
 {
@@ -13,18 +14,19 @@ namespace NeighborlyHelp
         private readonly GameView _view;
         private Timer _gameTimer;
 
+        private readonly DialogueService _dialogueService;
+
         public GameController(GameModel model, GameView view)
         {
             _model = model ?? throw new ArgumentNullException(nameof(model));
             _view = view ?? throw new ArgumentNullException(nameof(view));
 
-            // Таймер игрового цикла
+            // Инициализация сервисов
+            _dialogueService = new DialogueService();
+
             _gameTimer = new Timer { Interval = 16 };
             _gameTimer.Tick += GameLoop;
             _gameTimer.Start();
-
-            // ВАЖНО: Подписку на HintTimer делаем ПОСЛЕ того, как он будет создан в Initialize()
-            // Поэтому здесь мы это НЕ делаем. Мы сделаем это в StartGame().
         }
 
         public void StartGame()
