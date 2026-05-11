@@ -6,13 +6,13 @@ namespace NeighborlyHelp.Models
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public Color IconColor { get; set; } // Для простой отрисовки
+        public Color Color { get; set; }
 
         public Item(string name, string desc, Color color)
         {
             Name = name;
             Description = desc;
-            IconColor = color;
+            Color = color;
         }
     }
 }

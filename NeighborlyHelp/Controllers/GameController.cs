@@ -1,5 +1,6 @@
 ﻿using NeighborlyHelp.Models;
 using NeighborlyHelp.Services;
+using NeighborlyHelp.Views; // ← ДОБАВЛЕНО!
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -30,7 +31,7 @@ namespace NeighborlyHelp
             _gameTimer.Start();
 
             // Подписка на изменения модели для перерисовки (Паттерн Observer)
-            _model.OnStateChanged += () => _view.InvalidateView();
+            _model.OnStateChanged += () => _view.InvalidateView(); // ← БЕЗ ПРОВЕРКИ НА NULL
         }
 
         public void StartGame()
@@ -69,24 +70,23 @@ namespace NeighborlyHelp
             _view.InvalidateView();
         }
 
-        // === ПОЛНАЯ ЛОГИКА ОТРИСОВКИ (ИСПРАВЛЕНО: было пусто) ===
         public void Render(Graphics g)
         {
-            // 1. Фон
+            // === 1. Фон ===
             if (_model.BackgroundImage != null)
                 g.DrawImage(_model.BackgroundImage, 0, 0, _model.GameField.Width, _model.GameField.Height);
             else
                 g.Clear(_view.BackColor);
 
-            // 2. Объекты
+            // === 2. Объекты ===
             foreach (var obj in _model.GameObjects)
                 obj.Draw(g);
 
-            // 3. Игрок
+            // === 3. Игрок ===
             if (_model.PlayerSprite != null)
                 g.DrawImage(_model.PlayerSprite, _model.Player.X, _model.Player.Y, _model.Player.Width, _model.Player.Height);
 
-            // 4. Подсказка взаимодействия
+            // === 4. Подсказка взаимодействия ===
             if (!string.IsNullOrWhiteSpace(_model.InteractionHint))
             {
                 Font hintFont = new Font("Arial", 14, FontStyle.Bold);
@@ -206,7 +206,7 @@ namespace NeighborlyHelp
                 return;
             }
 
-            // === ДИАЛОГОВОЕ ОКНО (ИСПРАВЛЕНО: теперь рисуется корректно) ===
+            // === ДИАЛОГОВОЕ ОКНО ===
             if (_model.IsDialogueActive)
             {
                 using (Brush dimBrush = new SolidBrush(Color.FromArgb(180, 20, 20, 30)))
@@ -267,11 +267,22 @@ namespace NeighborlyHelp
                 return;
             }
 
+            if (_model.CurrentGameState == GameState.Ending)
+            {
+                if (_model.EndingImage != null)
+                {
+                    // Рисуем картинку на ВЕСЬ экран, перекрывая всё остальное
+                    g.DrawImage(_model.EndingImage, 0, 0, _view.ClientSize.Width, _view.ClientSize.Height);
+                }
+                // Если картинки нет, просто ничего не рисуем поверх игры (или можно оставить игру видимой на фоне)
+
+                return; // ВАЖНО: прерываем выполнение, чтобы не рисовать подсказку "Кликни на соседа..."
+            }
+
             g.DrawString("Кликни на соседа для диалога",
                 new Font("Arial", 9), Brushes.DarkGray, 10, 10);
         }
 
-        // === ОБРАБОТКА ВВОДА ===
         public void HandleMouseClick(MouseEventArgs e)
         {
             if (_model.IsDialogueActive)
@@ -291,6 +302,9 @@ namespace NeighborlyHelp
                         if (box.IsCorrect)
                         {
                             _view.ShowMessage("Посылка №18046 найдена! Отнеси её Оливеру.", "Успех");
+                            // Если Inventory удален из Model, закомментируй следующую строку:
+                            // _model.Inventory.Add(new Item("Посылка №18046", "Тяжелая коробка", Color.Brown));
+
                             _model.IsMiniGameActive = false;
                             _model.MailOptions.Clear();
                             _model.CurrentGameState = GameState.Quest2_Deliver;
@@ -358,6 +372,9 @@ namespace NeighborlyHelp
                     }
 
                     item.IsPickedUp = true;
+                    // Если Inventory удален из Model, закомментируй следующую строку:
+                    // _model.Inventory.Add(item.Item);
+
                     _model.InteractionHint = "";
 
                     if (_model.CurrentGameState == GameState.Quest1_Find && item.Item.Name == "Ключи")
@@ -373,10 +390,21 @@ namespace NeighborlyHelp
             {
                 if (npc.IsDialogAvailable && npc.Bounds.Contains(e.X, e.Y))
                 {
+                    // === ИСПРАВЛЕНИЕ: Если игра закончена, не позволяем начинать новые диалоги ===
+                    if (_model.CurrentGameState == GameState.Ending)
+                    {
+                        // Можно просто ничего не делать, или показать подсказку, что игра окончена
+                        return;
+                    }
+
                     if (!_model.IsCloseTo(npc.Bounds))
                     {
                         _model.InteractionHint = "Подойдите ближе!";
-                        _model.HintTimer.Stop(); _model.HintTimer.Start();
+                        if (_model.HintTimer != null)
+                        {
+                            _model.HintTimer.Stop();
+                            _model.HintTimer.Start();
+                        }
                         _view.InvalidateView();
                         return;
                     }
@@ -390,17 +418,7 @@ namespace NeighborlyHelp
         private void StartDialogueWithNPC(NPC npc)
         {
             var dialogueData = _dialogueService.GetDialogueFor(npc, _model.CurrentGameState);
-
-            // Проверка на случай, если сервис вернул пустые данные
-            if (dialogueData.NpcLines.Count == 0 && dialogueData.PlayerLines.Count == 0)
-            {
-                // Фоллбэк на старые данные NPC, если сервис не настроен
-                StartDialogue(npc.DisplayName, npc.DialogLines, new List<string>(), "sprite1.png");
-            }
-            else
-            {
-                StartDialogue(npc.DisplayName, dialogueData.NpcLines, dialogueData.PlayerLines, dialogueData.SpriteName);
-            }
+            StartDialogue(npc.DisplayName, dialogueData.NpcLines, dialogueData.PlayerLines, dialogueData.SpriteName);
         }
 
         private void StartDialogue(string speaker, List<string> npcLines, List<string> playerLines, string spriteFileName)
@@ -483,6 +501,8 @@ namespace NeighborlyHelp
                     else if (result == DialogResult.No) _view.ExitGame();
                     else _gameTimer.Start();
                     return;
+
+                    // Клавиша 'I' для инвентаря удалена, так как инвентарь убран из игры
             }
 
             if (newX < 0 || newX > _model.GameField.Width - _model.Player.Width ||

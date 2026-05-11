@@ -4,43 +4,32 @@ namespace NeighborlyHelp.Models
 {
     public class Mailbox : GameObject
     {
-        private Bitmap? sprite;
+        private const string SpritePath = "Assets/postpicture.png";
 
-        public Mailbox(int x, int y)
+        public Mailbox(int x, int y) : base(x, y, 140, 160)
         {
-            X = x;
-            Y = y;
-
-            // Размеры зоны клика/коллизии (подбери под свою картинку)
-            Width = 120;
-            Height = 140;
-
-            Name = "Mailbox";
-            IsSolid = false; // Ящик обычно непроходимый
-
-            // Загрузка PNG
-            try
-            {
-                sprite = new Bitmap("Assets/postpicture.png");
-            }
-            catch
-            {
-                sprite = null;
-            }
+            IsSolid = true;
         }
 
         public override void Draw(Graphics g)
         {
-            if (sprite != null)
+            try
             {
-                // Рисуем картинку с прозрачностью
-                g.DrawImage(sprite, X, Y, Width, Height);
+                using (Bitmap bmp = new Bitmap(SpritePath))
+                {
+                    g.DrawImage(bmp, X, Y, Width, Height);
+                }
             }
-            else
+            catch
             {
-                // Запасной вариант, если картинка не загрузилась
-                g.FillRectangle(Brushes.DarkBlue, X, Y, Width, Height);
-                g.DrawRectangle(Pens.White, X, Y, Width, Height);
+                using (Brush box = new SolidBrush(Color.Blue))
+                {
+                    g.FillRectangle(box, X, Y, Width, 50);
+                }
+                using (Brush pole = new SolidBrush(Color.Gray))
+                {
+                    g.FillRectangle(pole, X + 20, Y + 50, 20, 50);
+                }
             }
         }
     }

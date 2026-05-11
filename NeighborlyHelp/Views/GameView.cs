@@ -1,14 +1,12 @@
 ﻿using System;
-using NeighborlyHelp;
 using System.Drawing;
 using System.Windows.Forms;
-using Timer = System.Windows.Forms.Timer;
 
-namespace NeighborlyHelp
+namespace NeighborlyHelp.Views
 {
     public class GameView : Form
     {
-        private GameController _controller; // ← убрали readonly
+        private GameController _controller;
         private readonly GameModel _model;
 
         public GameView(GameController controller, GameModel model)
@@ -29,15 +27,15 @@ namespace NeighborlyHelp
         {
             this.SetStyle(ControlStyles.AllPaintingInWmPaint |
                           ControlStyles.OptimizedDoubleBuffer |
-                           ControlStyles.UserPaint, true);
+                          ControlStyles.UserPaint, true);
             this.DoubleBuffered = true;
-            this.Text = "🏡 Соседская помощь ";
+            this.Text = "🏡 Соседская помощь";
             this.FormBorderStyle = FormBorderStyle.None;
             this.WindowState = FormWindowState.Normal;
             this.Size = Screen.PrimaryScreen.Bounds.Size;
             this.Location = new Point(0, 0);
             this.StartPosition = FormStartPosition.Manual;
-            this.BackColor = ColorTranslator.FromHtml("#87CEEB ");
+            this.BackColor = ColorTranslator.FromHtml("#87CEEB");
             this.KeyPreview = true;
         }
 
@@ -54,18 +52,57 @@ namespace NeighborlyHelp
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            _controller.Render(e.Graphics);
+
+            // ← ДОБАВЛЕНА ПРОВЕРКА НА NULL
+            if (_controller != null)
+            {
+                _controller.Render(e.Graphics);
+            }
         }
 
-        private void OnMouseClick(object? sender, MouseEventArgs e) => _controller.HandleMouseClick(e);
-        private void OnMouseDown(object? sender, MouseEventArgs e) => _controller.HandleMouseDown(e);
-        private void OnMouseUp(object? sender, MouseEventArgs e) => _controller.HandleMouseUp(e);
-        private void OnMouseMove(object? sender, MouseEventArgs e) => _controller.HandleMouseMove(e);
-        private void OnKeyDown(object? sender, KeyEventArgs e) => _controller.HandleKeyDown(e);
-        private void OnResize(object? sender, EventArgs e) => _controller.HandleResize();
+        private void OnMouseClick(object? sender, MouseEventArgs e)
+        {
+            _controller?.HandleMouseClick(e);
+        }
 
-        public void InvalidateView() => this.Invalidate();
-        public void ShowMessage(string message, string title) => MessageBox.Show(message, title);
-        public void ExitGame() => Application.Exit();
+        private void OnMouseDown(object? sender, MouseEventArgs e)
+        {
+            _controller?.HandleMouseDown(e);
+        }
+
+        private void OnMouseUp(object? sender, MouseEventArgs e)
+        {
+            _controller?.HandleMouseUp(e);
+        }
+
+        private void OnMouseMove(object? sender, MouseEventArgs e)
+        {
+            _controller?.HandleMouseMove(e);
+        }
+
+        private void OnKeyDown(object? sender, KeyEventArgs e)
+        {
+            _controller?.HandleKeyDown(e);
+        }
+
+        private void OnResize(object? sender, EventArgs e)
+        {
+            _controller?.HandleResize();
+        }
+
+        public void InvalidateView()
+        {
+            this.Invalidate();
+        }
+
+        public void ShowMessage(string message, string title)
+        {
+            MessageBox.Show(message, title);
+        }
+
+        public void ExitGame()
+        {
+            Application.Exit();
+        }
     }
 }

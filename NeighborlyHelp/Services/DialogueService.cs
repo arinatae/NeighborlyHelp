@@ -1,9 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using NeighborlyHelp.Core;
 using NeighborlyHelp.Models;
+using System;
+using System.Collections.Generic;
 
 namespace NeighborlyHelp.Services
 {
+    /// <summary>
+    /// Класс-контейнер для данных диалога.
+    /// </summary>
     public class DialogueData
     {
         public List<string> NpcLines { get; set; } = new List<string>();
@@ -11,17 +15,30 @@ namespace NeighborlyHelp.Services
         public string SpriteName { get; set; } = "";
     }
 
+    /// <summary>
+    /// Сервис, управляющий текстами диалогов.
+    /// Реализует паттерн Service: инкапсулирует логику выбора реплик.
+    /// </summary>
     public class DialogueService
     {
+        /// <summary>
+        /// Возвращает данные диалога для конкретного NPC в текущем состоянии игры.
+        /// </summary>
+        /// <param name="npc">NPC, с которым взаимодействует игрок.</param>
+        /// <param name="currentState">Текущее состояние игры (квест).</param>
+        /// <returns>Объект DialogueData со списками реплик и именем спрайта.</returns>
         public DialogueData GetDialogueFor(NPC npc, GameState currentState)
         {
             var data = new DialogueData();
 
-            if (npc.DisplayName == "Мила")
+            // === Шарлотта ===
+            if (npc.DisplayName == "Шарлотта")
             {
                 data.SpriteName = "sprite1.png";
+
                 if (currentState == GameState.Quest1_Return)
                 {
+                    // Диалог при возврате ключей
                     data.NpcLines = new List<string>
                     {
                         "О, что это? Ты нашла мои ключики! Теперь я могу спокойно зайти домой",
@@ -35,7 +52,7 @@ namespace NeighborlyHelp.Services
                         "Ха-ха, не удивлена! Он вечно куда-то спешит. Пойду найду его, может быть смогу чем-то помочь"
                     };
                 }
-                else // Quest1_Talk (Начало игры)
+                else // Quest1_Talk (Начальный диалог)
                 {
                     data.NpcLines = new List<string>
                     {
@@ -45,16 +62,20 @@ namespace NeighborlyHelp.Services
                     };
                     data.PlayerLines = new List<string>
                     {
-                        "Привет, Мила! Да, у меня все прекрасно. Вот вышла на прогулку, подышать свежим воздухом и заняться чем-нибудь интересным. Как твои дела?",
+                        "Привет, Шарлотта! Да, у меня все прекрасно. Вот вышла на прогулку, подышать свежим воздухом и заняться чем-нибудь интересным. Как твои дела?",
                         "Как же так! Наверняка ты их просто где-то выронила. Давай мы найдем их вместе!"
                     };
                 }
             }
+
+            // === ОЛИВЕР ===
             else if (npc.DisplayName == "Оливер")
             {
                 data.SpriteName = "sprite2.png";
+
                 if (currentState == GameState.Quest2_Deliver)
                 {
+                    // Диалог при доставке посылки
                     data.NpcLines = new List<string>
                     {
                         "Ты уже вернулась? Даже забрала мою посылку! Супер, огромное тебе спасибо!",
@@ -64,11 +85,11 @@ namespace NeighborlyHelp.Services
                     data.PlayerLines = new List<string>
                     {
                         "Здравствуйте, курьер-соседка к Вашим услугам, ха-ха! Заказ 18046 твой!",
-                        "Рада стараться! Сегодня вечером Мила пригласила всех на чаепитие. Может быть ты видел кого-то ещё из наших соседей?",
+                        "Рада стараться! Сегодня вечером Шарлотта пригласила всех на чаепитие. Может быть ты видел кого-то ещё из наших соседей?",
                         "Конечно, садоводство - её любимое занятие, как я сразу не догадалась! Тогда пррогуляюсь до нашей клумбы"
                     };
                 }
-                else // Quest2_Spawn
+                else // Quest2_Spawn (Первая встреча)
                 {
                     data.NpcLines = new List<string>
                     {
@@ -83,11 +104,15 @@ namespace NeighborlyHelp.Services
                     };
                 }
             }
+
+            // === МЕЛИССА ===
             else if (npc.DisplayName == "Мелисса")
             {
                 data.SpriteName = "sprite3.png";
+
                 if (currentState == GameState.Quest3_Completed)
                 {
+                    // Диалог после полива цветов
                     data.NpcLines = new List<string>
                     {
                         "Боже мой, клумба просто ожила! Спасибо тебе огромное!",
@@ -101,7 +126,7 @@ namespace NeighborlyHelp.Services
                         "Поняла, сейчас найду Ричарда."
                     };
                 }
-                else // Quest3_Spawn
+                else // Quest3_Spawn (Первая встреча)
                 {
                     data.NpcLines = new List<string>
                     {
@@ -116,11 +141,15 @@ namespace NeighborlyHelp.Services
                     };
                 }
             }
+
+            // === РИЧАРД ===
             else if (npc.DisplayName == "Ричард")
             {
                 data.SpriteName = "sprite4.png";
+
                 if (currentState == GameState.Quest4_Spawn)
                 {
+                    // Первая встреча (просьба настроить радио)
                     data.NpcLines = new List<string>
                     {
                         "Кто пришел? Ты от Мелиссы? Здорово! Слушай, у меня тут беда...",
@@ -136,6 +165,7 @@ namespace NeighborlyHelp.Services
                 }
                 else if (currentState == GameState.Quest4_Completed)
                 {
+                    // После настройки радио
                     data.NpcLines = new List<string>
                     {
                         "Спасибо тебе огромное! Подкаст заиграл!",
@@ -149,7 +179,7 @@ namespace NeighborlyHelp.Services
                 }
                 else
                 {
-                    // Заглушка, если состояние неизвестно
+                    // Заглушка на случай непредвиденного состояния
                     data.NpcLines.Add("Привет! Чем могу помочь?");
                     data.PlayerLines.Add("Привет!");
                 }

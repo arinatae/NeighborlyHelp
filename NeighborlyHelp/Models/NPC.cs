@@ -7,34 +7,30 @@ namespace NeighborlyHelp.Models
     {
         public string DisplayName { get; set; }
         public List<string> DialogLines { get; set; }
-        public bool IsDialogAvailable { get; set; } = true;
-        public Bitmap? SpriteImage { get; set; }
+        public string SpriteName { get; set; }
         public string PortraitFileName { get; set; }
+        public bool IsDialogAvailable { get; set; } = true;
 
-        public NPC(int x, int y, string name, List<string> dialog, string imagePath, int width = 100, int height = 100, string portraitFile = "")
+        public NPC(int x, int y, string name, List<string> lines, string sprite, int w, int h, string portrait = "")
+            : base(x, y, w, h)
         {
-            X = x;
-            Y = y;
-            Width = width;
-            Height = height;
-            Name = "NPC";
             DisplayName = name;
-            DialogLines = dialog;
-            IsSolid = false;
-            PortraitFileName = portraitFile;
-
-            try { SpriteImage = new Bitmap("Assets/" + imagePath); }
-            catch { SpriteImage = null; }
+            DialogLines = lines;
+            SpriteName = sprite;
+            PortraitFileName = portrait;
         }
 
         public override void Draw(Graphics g)
         {
-            if (SpriteImage != null)
-                g.DrawImage(SpriteImage, X, Y, Width, Height);
-            else
+            // Загрузка спрайта по имени
+            try
             {
-                Brush bodyBrush = new SolidBrush(Color.FromArgb(255, 182, 193));
-                g.FillEllipse(bodyBrush, X, Y, Width, Height);
+                using var bmp = new Bitmap($"Assets/{SpriteName}");
+                g.DrawImage(bmp, X, Y, Width, Height);
+            }
+            catch
+            {
+                g.FillRectangle(Brushes.Blue, X, Y, Width, Height);
             }
         }
     }

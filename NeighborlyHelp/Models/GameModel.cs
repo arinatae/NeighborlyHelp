@@ -23,7 +23,8 @@ namespace NeighborlyHelp
         Quest4_Spawn,
         Quest4_Talk,
         Quest4_Radio,
-        Quest4_Completed
+        Quest4_Completed,
+        Ending
     }
 
     public class GameModel
@@ -36,11 +37,11 @@ namespace NeighborlyHelp
         public List<GameObject> GameObjects { get; set; } = new List<GameObject>();
         public List<NPC> NPCs { get; set; } = new List<NPC>();
 
-        // Вернули Collectibles, так как они нужны для ключей на карте
+        // Collectibles нужны для хранения ключей на карте, даже если нет инвентаря
         public List<Collectible> Collectibles { get; set; } = new List<Collectible>();
 
-        // Инвентарь удален по запросу. 
-        // ВАЖНО: В GameController.cs нужно удалить обращения к _model.Inventory
+        // Inventory удален по запросу. 
+        // ВАЖНО: В GameController.cs нужно удалить или закомментировать обращения к _model.Inventory
 
         public QuestManager QuestManager { get; set; } = new QuestManager();
 
@@ -84,13 +85,16 @@ namespace NeighborlyHelp
             OnStateChanged?.Invoke();
         }
 
+        public Bitmap? EndingImage { get; set; } = null;
+
         public void Initialize()
         {
             GameField = new GameField();
             Player = new Player(530, 450)
             {
                 Width = 200,
-                Height = 200
+                Height = 200,
+                Speed = 50
             };
 
             try { PlayerSprite = new Bitmap("Assets/sprite0.png"); } catch { }
@@ -115,6 +119,17 @@ namespace NeighborlyHelp
             HintTimer = new Timer { Interval = 2000 };
             // Исправлено: очищаем подсказку в пустую строку
             HintTimer.Tick += (s, e) => { InteractionHint = ""; NotifyChanged(); };
+
+            try
+            {
+                // ЗАМЕНИ ПУТЬ НА СВОЙ ФАЙЛ КАРТИНКИ КОНЦОВКИ
+                EndingImage = new Bitmap("Assets/final.png");
+            }
+            catch (Exception ex)
+            {
+                // Добавь вывод ошибки, чтобы увидеть, почему не грузится
+                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки концовки: {ex.Message}");
+            }
         }
 
         public bool IsCloseTo(Rectangle targetBounds)

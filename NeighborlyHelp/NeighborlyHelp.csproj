@@ -16,6 +16,9 @@
     <None Update="Assets\backpicture.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\final.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\klumbapicture.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

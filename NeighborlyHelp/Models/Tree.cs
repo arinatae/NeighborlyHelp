@@ -4,42 +4,28 @@ namespace NeighborlyHelp.Models
 {
     public class Tree : GameObject
     {
-        private Bitmap? sprite;
+        private const string SpritePath = "Assets/treepicture.png";
 
-        public Tree(int x, int y)
+        // Жестко задаем размеры как в оригинале
+        public Tree(int x, int y) : base(x, y, 195, 200)
         {
-            X = x;
-            Y = y;
-
-            // Установи размеры зоны клика/столкновения под твою картинку
-            Width = 250;  // Ширина дерева
-            Height = 250; // Высота дерева
-
-            Name = "Tree";
-            IsSolid = false; // Дерево обычно проходимое
-
-            // Загрузка PNG-картинки
-            try
-            {
-                sprite = new Bitmap("Assets/treepicture.png");
-            }
-            catch
-            {
-                sprite = null;
-            }
+            IsSolid = true;
         }
 
         public override void Draw(Graphics g)
         {
-            if (sprite != null)
+            try
             {
-                // Рисуем картинку дерева с прозрачностью
-                g.DrawImage(sprite, X, Y, Width, Height);
+                using (Bitmap bmp = new Bitmap(SpritePath))
+                {
+                    // Растягиваем картинку до Width и Height объекта
+                    g.DrawImage(bmp, X, Y, Width, Height);
+                }
             }
-            else
+            catch
             {
-                // Запасной вариант, если картинка не загрузилась
-                using (Brush brush = new SolidBrush(Color.DarkGreen))
+                // Заглушка, если картинки нет
+                using (Brush brush = new SolidBrush(Color.ForestGreen))
                 {
                     g.FillEllipse(brush, X, Y, Width, Height);
                 }

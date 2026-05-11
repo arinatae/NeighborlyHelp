@@ -4,45 +4,31 @@ namespace NeighborlyHelp.Models
 {
     public class Radio : GameObject
     {
-        private Bitmap? sprite;
+        private const string SpritePath = "Assets/radiopicture.png";
 
-        public Radio(int x, int y)
+        public Radio(int x, int y) : base(x, y, 80, 60)
         {
-            X = x;
-            Y = y;
-
-            // Установи размеры зоны клика/границ под пропорции твоей картинки
-            Width = 100;  // Ширина
-            Height = 100; // Высота
-
-            Name = "Radio";
-            IsSolid = false; // Поставь true, если радио должно быть препятствием
-
-            // Загрузка PNG-картинки
-            try
-            {
-                sprite = new Bitmap("Assets/radiopicture.png");
-            }
-            catch
-            {
-                sprite = null;
-            }
+            IsSolid = true;
         }
 
         public override void Draw(Graphics g)
         {
-            if (sprite != null)
+            try
             {
-                // Рисуем картинку радио с прозрачным фоном
-                g.DrawImage(sprite, X, Y, Width, Height);
-            }
-            else
-            {
-                // Запасной вариант, если картинка не загрузилась
-                using (Brush brush = new SolidBrush(Color.DarkGray))
+                using (Bitmap bmp = new Bitmap(SpritePath))
                 {
-                    g.FillRectangle(brush, X, Y, Width, Height);
-                    g.DrawRectangle(Pens.Black, X, Y, Width, Height);
+                    g.DrawImage(bmp, X, Y, Width, Height);
+                }
+            }
+            catch
+            {
+                using (Brush body = new SolidBrush(Color.DarkSlateGray))
+                {
+                    g.FillRectangle(body, X, Y, Width, Height);
+                }
+                using (Pen pen = new Pen(Color.Silver, 2))
+                {
+                    g.DrawRectangle(pen, X, Y, Width, Height);
                 }
             }
         }
