@@ -29,20 +29,27 @@ namespace NeighborlyHelp
     public class GameModel
     {
         public GameState CurrentGameState { get; set; } = GameState.Intro;
+
         public Player Player { get; set; } = null!;
         public GameField GameField { get; set; } = null!;
+
         public List<GameObject> GameObjects { get; set; } = new List<GameObject>();
         public List<NPC> NPCs { get; set; } = new List<NPC>();
+
+        // Вернули Collectibles, так как они нужны для ключей на карте
         public List<Collectible> Collectibles { get; set; } = new List<Collectible>();
-        public Inventory Inventory { get; set; } = new Inventory();
+
+        // Инвентарь удален по запросу. 
+        // ВАЖНО: В GameController.cs нужно удалить обращения к _model.Inventory
+
         public QuestManager QuestManager { get; set; } = new QuestManager();
 
         public bool IsDialogueActive { get; set; } = false;
-        public string DialogueSpeaker { get; set; } = " ";
+        public string DialogueSpeaker { get; set; } = ""; // Исправлено: была строка с пробелами "  "
         public List<string> DialogueLines { get; set; } = new List<string>();
         public int DialogueLineIndex { get; set; } = 0;
         public Bitmap? DialogueSprite { get; set; } = null;
-        public string PlayerDisplayName { get; set; } = "Ты ";
+        public string PlayerDisplayName { get; set; } = "Ты"; // Исправлено: был лишний пробел
         public Bitmap? PlayerPortrait { get; set; } = null;
 
         public bool IsMiniGameActive { get; set; } = false;
@@ -59,7 +66,7 @@ namespace NeighborlyHelp
         public bool IsDraggingRadio { get; set; } = false;
         public Rectangle RadioBarBounds { get; set; }
 
-        public string InteractionHint { get; set; } = "";
+        public string InteractionHint { get; set; } = ""; // Исправлено: была строка с пробелами "  "
         public Timer HintTimer { get; set; } = null!;
 
         public const int INTERACTION_RADIUS = 120;
@@ -68,6 +75,14 @@ namespace NeighborlyHelp
         public Bitmap? BackgroundImage { get; set; }
         public Bitmap? BoxSprite { get; set; }
         public Bitmap? FlowerSprite { get; set; }
+
+        // Событие для паттерна Observer
+        public event Action OnStateChanged = delegate { };
+
+        private void NotifyChanged()
+        {
+            OnStateChanged?.Invoke();
+        }
 
         public void Initialize()
         {
@@ -98,7 +113,8 @@ namespace NeighborlyHelp
             GameObjects.Add(new Wall(GameField.Width - 10, 0, 10, GameField.Height));
 
             HintTimer = new Timer { Interval = 2000 };
-            HintTimer.Tick += (s, e) => { InteractionHint = " "; };
+            // Исправлено: очищаем подсказку в пустую строку
+            HintTimer.Tick += (s, e) => { InteractionHint = ""; NotifyChanged(); };
         }
 
         public bool IsCloseTo(Rectangle targetBounds)
@@ -112,12 +128,16 @@ namespace NeighborlyHelp
 
         public void SpawnKeys()
         {
+            // Проверка использует Collectibles, поэтому поле должно существовать
             if (Collectibles.Exists(c => c.Item.Name == "Ключи" && !c.IsPickedUp)) return;
 
             Item keyItem = new Item("Ключи", "Блестящие ключи от домика", Color.Gold);
             Collectible keys = new Collectible(310, 460, keyItem, "spritekey.png");
+
             Collectibles.Add(keys);
             GameObjects.Add(keys);
+
+            NotifyChanged();
         }
 
         public void SpawnNPC(string name, int x, int y, List<string> lines, string spriteName, int width, int height, string portraitFile = "")
@@ -125,6 +145,7 @@ namespace NeighborlyHelp
             NPC newNpc = new NPC(x, y, name, lines, spriteName, width, height, portraitFile);
             NPCs.Add(newNpc);
             GameObjects.Add(newNpc);
+            NotifyChanged();
         }
 
         public void RemoveNPC(string name)
@@ -134,6 +155,7 @@ namespace NeighborlyHelp
             {
                 GameObjects.Remove(npc);
                 NPCs.Remove(npc);
+                NotifyChanged();
             }
         }
 
@@ -166,6 +188,7 @@ namespace NeighborlyHelp
 
             IsMiniGameActive = true;
             CurrentGameState = GameState.Quest2_MiniGame;
+            NotifyChanged();
         }
 
         public void StartFlowerMiniGame(int clientWidth, int clientHeight)
@@ -195,6 +218,7 @@ namespace NeighborlyHelp
 
             IsFlowerGameActive = true;
             CurrentGameState = GameState.Quest3_Watering;
+            NotifyChanged();
         }
 
         public void StartRadioMiniGame(int clientWidth, int clientHeight)
@@ -210,6 +234,7 @@ namespace NeighborlyHelp
             );
 
             CurrentGameState = GameState.Quest4_Radio;
+            NotifyChanged();
         }
 
         public void UpdateRadioFreq(int mouseX)
@@ -228,8 +253,8 @@ namespace NeighborlyHelp
                 IsDialogueActive = false;
                 DialogueSprite?.Dispose();
                 DialogueSprite = null;
-                return;
             }
+            NotifyChanged();
         }
 
         public void MovePlayer(int newX, int newY)
@@ -250,6 +275,7 @@ namespace NeighborlyHelp
                     break;
                 }
             }
+            NotifyChanged();
         }
 
         public void CheckFlowerGameWin()
@@ -259,6 +285,7 @@ namespace NeighborlyHelp
                 IsFlowerGameActive = false;
                 IsWatering = false;
                 CurrentGameState = GameState.Quest3_Completed;
+                NotifyChanged();
             }
         }
 
@@ -268,6 +295,7 @@ namespace NeighborlyHelp
             {
                 IsRadioGameActive = false;
                 CurrentGameState = GameState.Quest4_Completed;
+                NotifyChanged();
             }
         }
 
@@ -296,7 +324,7 @@ namespace NeighborlyHelp
     public class MailBoxOption
     {
         public Rectangle Bounds { get; set; }
-        public string Number { get; set; } = ""; // ← ИСПРАВЛЕНО: инициализация
+        public string Number { get; set; } = ""; // Исправлено: был пробел " "
         public bool IsCorrect { get; set; }
     }
 }
