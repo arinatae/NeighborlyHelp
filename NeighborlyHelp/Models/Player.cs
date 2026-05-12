@@ -14,6 +14,7 @@
         {
             X = startX;
             Y = startY;
+            Speed = 5;
         }
 
         public void MoveUp() => Y -= Speed;
