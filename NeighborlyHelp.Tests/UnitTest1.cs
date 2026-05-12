@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using NeighborlyHelp;
 using NeighborlyHelp.Services;
 using NeighborlyHelp.Models;
@@ -9,14 +10,13 @@ namespace NeighborlyHelp.Tests
 {
     public class GameLogicTests
     {
-        // Тест проверяет, что сервис диалогов возвращает корректную вводную фразу для персонажа Шарлотта.
-        // Ожидается, что первая реплика содержит слово "привет".
+        // ТЕСТЫ ДЛЯ DIALOGUE SERVICE
+
         [Fact]
         public void DialogueService_ReturnsCorrectIntroForCharlotte()
         {
             var dialogueService = new DialogueService();
             var charlotte = new NPC(0, 0, "Шарлотта", new List<string>(), "sprite1.png", 100, 100);
-
             var result = dialogueService.GetDialogueFor(charlotte, GameState.Quest1_Talk);
 
             Assert.NotNull(result);
@@ -24,14 +24,11 @@ namespace NeighborlyHelp.Tests
             Assert.Contains("привет", result.NpcLines[0].ToLower());
         }
 
-        // Тест проверяет, что сервис диалогов возвращает корректную вводную фразу для персонажа Ричард.
-        // Ожидается, что первая реплика содержит слово "радио", так как это связано с квестом.
         [Fact]
         public void DialogueService_ReturnsCorrectIntroForRichard()
         {
             var dialogueService = new DialogueService();
             var richard = new NPC(0, 0, "Ричард", new List<string>(), "sprite4.png", 100, 100);
-
             var result = dialogueService.GetDialogueFor(richard, GameState.Quest4_Spawn);
 
             Assert.NotNull(result);
@@ -39,8 +36,32 @@ namespace NeighborlyHelp.Tests
             Assert.Contains("радио", result.NpcLines[0].ToLower());
         }
 
-        // Тест проверя логику перехода состояния игры: после завершения 4-го квеста и окончания диалога
-        // игра должна переключиться в состояние "Концовка" (Ending).
+        [Fact]
+        public void DialogueService_ReturnsCorrectIntroForOliver()
+        {
+            var dialogueService = new DialogueService();
+            var oliver = new NPC(0, 0, "Оливер", new List<string>(), "sprite2.png", 100, 100);
+            var result = dialogueService.GetDialogueFor(oliver, GameState.Quest2_Spawn);
+
+            Assert.NotNull(result);
+            Assert.NotEmpty(result.NpcLines);
+            Assert.Contains("посылк", result.NpcLines[0].ToLower()); // Проверяем контекст про посылку
+        }
+
+        [Fact]
+        public void DialogueService_ReturnsCorrectIntroForMelissa()
+        {
+            var dialogueService = new DialogueService();
+            var melissa = new NPC(0, 0, "Мелисса", new List<string>(), "sprite3.png", 100, 100);
+            var result = dialogueService.GetDialogueFor(melissa, GameState.Quest3_Spawn);
+
+            Assert.NotNull(result);
+            Assert.NotEmpty(result.NpcLines);
+            Assert.Contains("цвет", result.NpcLines[0].ToLower()); // Проверяем контекст про цветы
+        }
+
+        // ТЕСТЫ ДЛЯ QUEST SERVICE (ПЕРЕХОДЫ МЕЖДУ КВЕСТАМИ)
+
         [Fact]
         public void QuestService_SwitchesToEndingAfterQuest4Completed()
         {
@@ -50,15 +71,11 @@ namespace NeighborlyHelp.Tests
             model.IsDialogueActive = false;
 
             var questService = new QuestService(model);
-
             questService.HandleDialogueEnd();
 
             Assert.Equal(GameState.Ending, model.CurrentGameState);
         }
 
-        // Тест проверяет переход от 1-го квеста ко 2-му после возвращения ключей.
-        // После окончания диалога с Шарлоттой она должна исчезнуть, должен появиться Оливер,
-        // а состояние игры должно измениться на Quest2_Spawn.
         [Fact]
         public void QuestService_StartsQuest2AfterReturningKeys()
         {
@@ -66,11 +83,9 @@ namespace NeighborlyHelp.Tests
             model.Initialize();
             model.CurrentGameState = GameState.Quest1_Return;
             model.IsDialogueActive = false;
-
             model.SpawnNPC("Шарлотта", 0, 0, new List<string>(), "sprite1.png", 100, 100);
 
             var questService = new QuestService(model);
-
             questService.HandleDialogueEnd();
 
             Assert.Equal(GameState.Quest2_Spawn, model.CurrentGameState);
@@ -78,8 +93,42 @@ namespace NeighborlyHelp.Tests
             Assert.Contains(model.NPCs, n => n.DisplayName == "Оливер");
         }
 
-        // Тест проверяет корректную инициализацию игрока в модели игры.
-        // Проверяются начальные координаты X и Y, а также наличие объекта игрока.
+        [Fact]
+        public void QuestService_StartsQuest3AfterDeliveringPackage()
+        {
+            var model = new GameModel();
+            model.Initialize();
+            model.CurrentGameState = GameState.Quest2_Deliver;
+            model.IsDialogueActive = false;
+            model.SpawnNPC("Оливер", 0, 0, new List<string>(), "sprite2.png", 100, 100);
+
+            var questService = new QuestService(model);
+            questService.HandleDialogueEnd();
+
+            Assert.Equal(GameState.Quest3_Spawn, model.CurrentGameState);
+            Assert.DoesNotContain(model.NPCs, n => n.DisplayName == "Оливер");
+            Assert.Contains(model.NPCs, n => n.DisplayName == "Мелисса");
+        }
+
+        [Fact]
+        public void QuestService_StartsQuest4AfterWateringFlowers()
+        {
+            var model = new GameModel();
+            model.Initialize();
+            model.CurrentGameState = GameState.Quest3_Completed;
+            model.IsDialogueActive = false;
+            model.SpawnNPC("Мелисса", 0, 0, new List<string>(), "sprite3.png", 100, 100);
+
+            var questService = new QuestService(model);
+            questService.HandleDialogueEnd();
+
+            Assert.Equal(GameState.Quest4_Spawn, model.CurrentGameState);
+            Assert.DoesNotContain(model.NPCs, n => n.DisplayName == "Мелисса");
+            Assert.Contains(model.NPCs, n => n.DisplayName == "Ричард");
+        }
+
+        // ТЕСТЫ ДЛЯ GAME MODEL (МЕХАНИКИ ИГРЫ)
+
         [Fact]
         public void GameModel_InitializesPlayerCorrectly()
         {
@@ -91,24 +140,17 @@ namespace NeighborlyHelp.Tests
             Assert.Equal(450, model.Player.Y);
         }
 
-        // Тест проверяет корректное создание предмета "Ключи" в мире игры.
-        // После вызова SpawnKeys в списке collectibles должен появиться ровно один предмет с именем "Ключи".
         [Fact]
         public void GameModel_SpawnsKeysCorrectly()
         {
             var model = new GameModel();
             model.Initialize();
-
             model.SpawnKeys();
 
             Assert.Single(model.Collectibles);
             Assert.Equal("Ключи", model.Collectibles[0].Item.Name);
         }
 
-        // Тест проверяет логику мини-игры с радио.
-        // Если текущая частота близка к целевой (в пределах допустимой погрешности),
-        // мини-игра должна завершиться успешно, флаг активности сброситься,
-        // а состояние игры перейти в Quest4_Completed.
         [Fact]
         public void GameModel_RadioGame_WinsWhenFreqIsClose()
         {
@@ -116,12 +158,117 @@ namespace NeighborlyHelp.Tests
             model.Initialize();
             model.StartRadioMiniGame(800, 600);
             model.TargetFreq = 95.5f;
-            model.RadioFreq = 95.0f;
+            model.RadioFreq = 95.0f; // Разница 0.5 < 0.8
 
             model.CheckRadioGameWin();
 
             Assert.False(model.IsRadioGameActive);
             Assert.Equal(GameState.Quest4_Completed, model.CurrentGameState);
+        }
+
+        [Fact]
+        public void GameModel_RadioGame_DoesNotWinIfFreqIsFar()
+        {
+            var model = new GameModel();
+            model.Initialize();
+            model.StartRadioMiniGame(800, 600);
+            model.TargetFreq = 95.5f;
+            model.RadioFreq = 88.0f; // Разница большая
+
+            model.CheckRadioGameWin();
+
+            Assert.True(model.IsRadioGameActive); // Игра должна продолжаться
+            Assert.NotEqual(GameState.Quest4_Completed, model.CurrentGameState);
+        }
+
+        [Fact]
+        public void GameModel_FlowerGame_WinsWhenAllWatered()
+        {
+            var model = new GameModel();
+            model.Initialize();
+            model.StartFlowerMiniGame(800, 600);
+
+            // Поливаем все цветы до максимума
+            foreach (var flower in model.Flowers)
+            {
+                flower.WaterLevel = 100;
+            }
+
+            model.CheckFlowerGameWin();
+
+            Assert.False(model.IsFlowerGameActive);
+            Assert.Equal(GameState.Quest3_Completed, model.CurrentGameState);
+        }
+
+        [Fact]
+        public void GameModel_FlowerGame_DoesNotWinIfNotAllWatered()
+        {
+            var model = new GameModel();
+            model.Initialize();
+            model.StartFlowerMiniGame(800, 600);
+
+            // Поливаем только один цветок
+            if (model.Flowers.Count > 0)
+                model.Flowers[0].WaterLevel = 100;
+
+            model.CheckFlowerGameWin();
+
+            Assert.True(model.IsFlowerGameActive);
+            Assert.NotEqual(GameState.Quest3_Completed, model.CurrentGameState);
+        }
+
+        [Fact]
+        public void GameModel_PlayerCannotMoveThroughWalls()
+        {
+            var model = new GameModel();
+            model.Initialize();
+
+            // Пытаемся двигать игрока за пределы поля (слева)
+            int initialX = model.Player.X;
+            model.MovePlayer(-100, model.Player.Y);
+
+            Assert.Equal(initialX, model.Player.X); // Координата X не должна измениться
+        }
+
+        [Fact]
+        public void GameModel_RemoveNPCWorksCorrectly()
+        {
+            var model = new GameModel();
+            model.Initialize();
+            model.SpawnNPC("TestNPC", 100, 100, new List<string>(), "sprite.png", 50, 50);
+
+            Assert.Single(model.NPCs);
+
+            model.RemoveNPC("TestNPC");
+
+            Assert.Empty(model.NPCs);
+        }
+
+        [Fact]
+        public void GameModel_MailboxMiniGame_CreatesCorrectNumberOfBoxes()
+        {
+            var model = new GameModel();
+            model.Initialize();
+            model.StartMailboxMiniGame(800, 600);
+
+            Assert.Equal(50, model.MailOptions.Count);
+            Assert.True(model.IsMiniGameActive);
+        }
+
+        [Fact]
+        public void GameModel_MailboxMiniGame_HasExactlyOneCorrectBox()
+        {
+            var model = new GameModel();
+            model.Initialize();
+            model.StartMailboxMiniGame(800, 600);
+
+            int correctCount = 0;
+            foreach (var box in model.MailOptions)
+            {
+                if (box.IsCorrect) correctCount++;
+            }
+
+            Assert.Equal(1, correctCount);
         }
     }
 }
