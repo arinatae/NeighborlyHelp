@@ -53,7 +53,6 @@ namespace NeighborlyHelp.Views
         {
             base.OnPaint(e);
 
-            // ← ДОБАВЛЕНА ПРОВЕРКА НА NULL
             if (_controller != null)
             {
                 _controller.Render(e.Graphics);

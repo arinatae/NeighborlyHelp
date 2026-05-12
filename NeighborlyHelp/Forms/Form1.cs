@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-using NeighborlyHelp.Views; // ← ДОБАВЛЕНО!
+using NeighborlyHelp.Views; 
 
 namespace NeighborlyHelp
 {

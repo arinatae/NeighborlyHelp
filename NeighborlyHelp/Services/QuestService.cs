@@ -13,45 +13,48 @@ namespace NeighborlyHelp.Services
 			_model = model ?? throw new ArgumentNullException(nameof(model));
 		}
 
-		public void HandleDialogueEnd()
+        public void HandleDialogueEnd()
+        {
+            if (!_model.IsDialogueActive)
+            {
+                // Проверяем, с кем мы только что говорили
+                if (_model.DialogueSpeaker == "Ричард")
+                {
+                    // Если квест с радио выполнен, переходим в концовку
+                    if (_model.CurrentGameState == GameState.Quest4_Completed)
+                    {
+                        _model.CurrentGameState = GameState.Ending;
+                        System.Diagnostics.Debug.WriteLine("DEBUG: Переход в ENDING выполнен через диалог с Ричардом.");
+                        return;
+                    }
+                }
+
+                // Стандартная логика для других квестов
+                switch (_model.CurrentGameState)
+                {
+                    case GameState.Quest1_Talk:
+                        _model.CurrentGameState = GameState.Quest1_Find;
+                        _model.SpawnKeys();
+                        break;
+                    case GameState.Quest1_Return:
+                        StartQuest2();
+                        break;
+                    case GameState.Quest2_Deliver:
+                        StartQuest3();
+                        break;
+                    case GameState.Quest3_Completed:
+                        StartQuest4();
+                        break;
+                    case GameState.Quest4_Spawn:
+                        _model.CurrentGameState = GameState.Quest4_Talk;
+                        break;
+                }
+            }
+        }
+
+        private void StartQuest2()
 		{
-			// Этот метод должен вызываться ТОЛЬКО когда диалог только что завершился
-			if (!_model.IsDialogueActive)
-			{
-				switch (_model.CurrentGameState)
-				{
-					case GameState.Quest1_Talk:
-						_model.CurrentGameState = GameState.Quest1_Find;
-						_model.SpawnKeys();
-						break;
-
-					case GameState.Quest1_Return:
-						StartQuest2();
-						break;
-
-					case GameState.Quest2_Deliver:
-						StartQuest3();
-						break;
-
-					case GameState.Quest3_Completed:
-						StartQuest4();
-						break;
-
-					case GameState.Quest4_Spawn:
-						_model.CurrentGameState = GameState.Quest4_Talk;
-						break;
-
-					case GameState.Quest4_Completed:
-						// === ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ ДЛЯ КОНЦОВКИ ===
-						_model.CurrentGameState = GameState.Ending;
-						break;
-				}
-			}
-		}
-
-		private void StartQuest2()
-		{
-			_model.RemoveNPC("Шарлотта"); // Или "Мила", если ты вернула старое имя
+			_model.RemoveNPC("Шарлотта"); 
 			_model.CurrentGameState = GameState.Quest2_Spawn;
 			_model.SpawnNPC("Оливер", 600, 400, new List<string>
 			{
@@ -65,7 +68,7 @@ namespace NeighborlyHelp.Services
 		{
 			_model.RemoveNPC("Оливер");
 			_model.CurrentGameState = GameState.Quest3_Spawn;
-			_model.SpawnNPC("Мелисса", 150, 400, new List<string>
+			_model.SpawnNPC("Мелисса", 230, 400, new List<string>
 			{
 				"Добрый денек, моя любимая соседка! Только посмотри, какие цветочки я сегодня посадила! Очень красивые, правда? Тебе нравится",
 				"Я очень рада! Садоводство - это прекрасно, хоть и очень выматывает. Фух, так устала... Не могла бы ты мне помочь?",
@@ -78,7 +81,7 @@ namespace NeighborlyHelp.Services
 			_model.RemoveNPC("Мелисса");
 			_model.CurrentGameState = GameState.Quest4_Spawn;
 			_model.GameObjects.Add(new Radio(800, 400));
-			_model.SpawnNPC("Ричард", 950, 400, new List<string>
+			_model.SpawnNPC("Ричард", 800, 300, new List<string>
 			{
 				"Ой, это ты! Спасибо, что пришла. Я помню что мы должны были сегодня слушать музыку, но у меня тут некая проблема с радио...",
 				"Ты видишь, оно совсем не хочет ловить нужную частоту. Ты случайно не разбираешься в радиотехнике?",

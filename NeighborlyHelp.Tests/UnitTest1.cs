@@ -9,6 +9,8 @@ namespace NeighborlyHelp.Tests
 {
     public class GameLogicTests
     {
+        // Тест проверяет, что сервис диалогов возвращает корректную вводную фразу для персонажа Шарлотта.
+        // Ожидается, что первая реплика содержит слово "привет".
         [Fact]
         public void DialogueService_ReturnsCorrectIntroForCharlotte()
         {
@@ -22,6 +24,8 @@ namespace NeighborlyHelp.Tests
             Assert.Contains("привет", result.NpcLines[0].ToLower());
         }
 
+        // Тест проверяет, что сервис диалогов возвращает корректную вводную фразу для персонажа Ричард.
+        // Ожидается, что первая реплика содержит слово "радио", так как это связано с квестом.
         [Fact]
         public void DialogueService_ReturnsCorrectIntroForRichard()
         {
@@ -35,6 +39,8 @@ namespace NeighborlyHelp.Tests
             Assert.Contains("радио", result.NpcLines[0].ToLower());
         }
 
+        // Тест проверя логику перехода состояния игры: после завершения 4-го квеста и окончания диалога
+        // игра должна переключиться в состояние "Концовка" (Ending).
         [Fact]
         public void QuestService_SwitchesToEndingAfterQuest4Completed()
         {
@@ -50,6 +56,9 @@ namespace NeighborlyHelp.Tests
             Assert.Equal(GameState.Ending, model.CurrentGameState);
         }
 
+        // Тест проверяет переход от 1-го квеста ко 2-му после возвращения ключей.
+        // После окончания диалога с Шарлоттой она должна исчезнуть, должен появиться Оливер,
+        // а состояние игры должно измениться на Quest2_Spawn.
         [Fact]
         public void QuestService_StartsQuest2AfterReturningKeys()
         {
@@ -69,6 +78,8 @@ namespace NeighborlyHelp.Tests
             Assert.Contains(model.NPCs, n => n.DisplayName == "Оливер");
         }
 
+        // Тест проверяет корректную инициализацию игрока в модели игры.
+        // Проверяются начальные координаты X и Y, а также наличие объекта игрока.
         [Fact]
         public void GameModel_InitializesPlayerCorrectly()
         {
@@ -80,6 +91,8 @@ namespace NeighborlyHelp.Tests
             Assert.Equal(450, model.Player.Y);
         }
 
+        // Тест проверяет корректное создание предмета "Ключи" в мире игры.
+        // После вызова SpawnKeys в списке collectibles должен появиться ровно один предмет с именем "Ключи".
         [Fact]
         public void GameModel_SpawnsKeysCorrectly()
         {
@@ -92,6 +105,10 @@ namespace NeighborlyHelp.Tests
             Assert.Equal("Ключи", model.Collectibles[0].Item.Name);
         }
 
+        // Тест проверяет логику мини-игры с радио.
+        // Если текущая частота близка к целевой (в пределах допустимой погрешности),
+        // мини-игра должна завершиться успешно, флаг активности сброситься,
+        // а состояние игры перейти в Quest4_Completed.
         [Fact]
         public void GameModel_RadioGame_WinsWhenFreqIsClose()
         {

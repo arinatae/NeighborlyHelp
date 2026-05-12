@@ -1,6 +1,6 @@
 ﻿using NeighborlyHelp.Models;
 using NeighborlyHelp.Services;
-using NeighborlyHelp.Views; // ← ДОБАВЛЕНО!
+using NeighborlyHelp.Views; 
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -31,7 +31,7 @@ namespace NeighborlyHelp
             _gameTimer.Start();
 
             // Подписка на изменения модели для перерисовки (Паттерн Observer)
-            _model.OnStateChanged += () => _view.InvalidateView(); // ← БЕЗ ПРОВЕРКИ НА NULL
+            _model.OnStateChanged += () => _view.InvalidateView(); 
         }
 
         public void StartGame()
@@ -269,14 +269,22 @@ namespace NeighborlyHelp
 
             if (_model.CurrentGameState == GameState.Ending)
             {
+                g.Clear(Color.White);
+
+                // Если картинка загрузилась , рисуем её поверх фона
                 if (_model.EndingImage != null)
                 {
-                    // Рисуем картинку на ВЕСЬ экран, перекрывая всё остальное
-                    g.DrawImage(_model.EndingImage, 0, 0, _view.ClientSize.Width, _view.ClientSize.Height);
+                    try
+                    {
+                        g.DrawImage(_model.EndingImage, 0, 0, _view.ClientSize.Width, _view.ClientSize.Height);
+                    }
+                    catch
+                    {
+                       
+                    }
                 }
-                // Если картинки нет, просто ничего не рисуем поверх игры (или можно оставить игру видимой на фоне)
 
-                return; // ВАЖНО: прерываем выполнение, чтобы не рисовать подсказку "Кликни на соседа..."
+                return; 
             }
 
             g.DrawString("Кликни на соседа для диалога",
@@ -302,8 +310,6 @@ namespace NeighborlyHelp
                         if (box.IsCorrect)
                         {
                             _view.ShowMessage("Посылка №18046 найдена! Отнеси её Оливеру.", "Успех");
-                            // Если Inventory удален из Model, закомментируй следующую строку:
-                            // _model.Inventory.Add(new Item("Посылка №18046", "Тяжелая коробка", Color.Brown));
 
                             _model.IsMiniGameActive = false;
                             _model.MailOptions.Clear();
@@ -372,8 +378,6 @@ namespace NeighborlyHelp
                     }
 
                     item.IsPickedUp = true;
-                    // Если Inventory удален из Model, закомментируй следующую строку:
-                    // _model.Inventory.Add(item.Item);
 
                     _model.InteractionHint = "";
 
@@ -390,10 +394,9 @@ namespace NeighborlyHelp
             {
                 if (npc.IsDialogAvailable && npc.Bounds.Contains(e.X, e.Y))
                 {
-                    // === ИСПРАВЛЕНИЕ: Если игра закончена, не позволяем начинать новые диалоги ===
+                    // Если игра закончена, не позволяем начинать новые диалоги 
                     if (_model.CurrentGameState == GameState.Ending)
                     {
-                        // Можно просто ничего не делать, или показать подсказку, что игра окончена
                         return;
                     }
 
@@ -478,6 +481,45 @@ namespace NeighborlyHelp
 
         public void HandleKeyDown(KeyEventArgs e)
         {
+            // === ГОРЯЧИЕ КЛАВИШИ РАЗРАБОТЧИКА ===
+            if (e.Control)
+            {
+                switch (e.KeyCode)
+                {
+                    case Keys.D1: // Ctrl+1: Пропустить поиск ключей (Квест 1)
+                        _model.CurrentGameState = GameState.Quest1_Return;
+                        _view.ShowMessage("Dev: Ключи найдены (Квест 1 пропущен)", "Debug");
+                        return;
+
+                    case Keys.D2: // Ctrl+2: Пропустить почту (Квест 2)
+                        _model.CurrentGameState = GameState.Quest2_Deliver;
+                        _view.ShowMessage("Dev: Посылка получена (Квест 2 пропущен)", "Debug");
+                        return;
+
+                    case Keys.D3: // Ctrl+3: Пропустить полив цветов (Квест 3)
+                        _model.CurrentGameState = GameState.Quest3_Completed;
+                        _view.ShowMessage("Dev: Цветы политы (Квест 3 пропущен)", "Debug");
+                        return;
+
+                    case Keys.D4: // Ctrl+4: Пропустить радио (Квест 4)
+                        _model.CurrentGameState = GameState.Quest4_Completed;
+                        _view.ShowMessage("Dev: Радио настроено (Квест 4 пропущен)", "Debug");
+                        return;
+
+                    case Keys.D5: // Ctrl+5: Сразу включить концовку
+                        _model.CurrentGameState = GameState.Ending;
+                        _view.ShowMessage("Dev: Включена концовка", "Debug");
+                        return;
+
+                    case Keys.R: // Ctrl+R: Рестарт игры
+                        _model.Initialize();
+                        _questService.StartStory();
+                        _view.ShowMessage("Dev: Игра перезапущена", "Debug");
+                        return;
+                }
+            }
+            // ========================================
+
             int newX = _model.Player.X;
             int newY = _model.Player.Y;
             int speed = _model.Player.Speed;

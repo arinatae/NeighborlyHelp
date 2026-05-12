@@ -40,17 +40,15 @@ namespace NeighborlyHelp
         // Collectibles нужны для хранения ключей на карте, даже если нет инвентаря
         public List<Collectible> Collectibles { get; set; } = new List<Collectible>();
 
-        // Inventory удален по запросу. 
-        // ВАЖНО: В GameController.cs нужно удалить или закомментировать обращения к _model.Inventory
 
         public QuestManager QuestManager { get; set; } = new QuestManager();
 
         public bool IsDialogueActive { get; set; } = false;
-        public string DialogueSpeaker { get; set; } = ""; // Исправлено: была строка с пробелами "  "
+        public string DialogueSpeaker { get; set; } = ""; 
         public List<string> DialogueLines { get; set; } = new List<string>();
         public int DialogueLineIndex { get; set; } = 0;
         public Bitmap? DialogueSprite { get; set; } = null;
-        public string PlayerDisplayName { get; set; } = "Ты"; // Исправлено: был лишний пробел
+        public string PlayerDisplayName { get; set; } = "Ты"; 
         public Bitmap? PlayerPortrait { get; set; } = null;
 
         public bool IsMiniGameActive { get; set; } = false;
@@ -67,7 +65,7 @@ namespace NeighborlyHelp
         public bool IsDraggingRadio { get; set; } = false;
         public Rectangle RadioBarBounds { get; set; }
 
-        public string InteractionHint { get; set; } = ""; // Исправлено: была строка с пробелами "  "
+        public string InteractionHint { get; set; } = ""; 
         public Timer HintTimer { get; set; } = null!;
 
         public const int INTERACTION_RADIUS = 120;
@@ -77,7 +75,6 @@ namespace NeighborlyHelp
         public Bitmap? BoxSprite { get; set; }
         public Bitmap? FlowerSprite { get; set; }
 
-        // Событие для паттерна Observer
         public event Action OnStateChanged = delegate { };
 
         private void NotifyChanged()
@@ -117,18 +114,26 @@ namespace NeighborlyHelp
             GameObjects.Add(new Wall(GameField.Width - 10, 0, 10, GameField.Height));
 
             HintTimer = new Timer { Interval = 2000 };
-            // Исправлено: очищаем подсказку в пустую строку
             HintTimer.Tick += (s, e) => { InteractionHint = ""; NotifyChanged(); };
+
+            string absolutePath = @"E:\ProjectsC#\NeighborlyHelp\NeighborlyHelp\NeighborlyHelp\Assets\end.png";
 
             try
             {
-                // ЗАМЕНИ ПУТЬ НА СВОЙ ФАЙЛ КАРТИНКИ КОНЦОВКИ
-                EndingImage = new Bitmap("Assets/final.png");
+                if (System.IO.File.Exists(absolutePath))
+                {
+                    EndingImage = new Bitmap(absolutePath);
+                    System.Diagnostics.Debug.WriteLine("!!! УСПЕХ: Картинка загружена по абсолютному пути !!!");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"!!! ОШИБКА: Файл НЕ НАЙДЕН по пути: {absolutePath} !!!");
+                    System.Diagnostics.Debug.WriteLine("Проверьте, лежит ли final.png именно в этой папке на диске.");
+                }
             }
             catch (Exception ex)
             {
-                // Добавь вывод ошибки, чтобы увидеть, почему не грузится
-                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки концовки: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"!!! ИСКЛЮЧЕНИЕ ПРИ ЗАГРУЗКЕ: {ex.Message} !!!");
             }
         }
 
@@ -143,7 +148,6 @@ namespace NeighborlyHelp
 
         public void SpawnKeys()
         {
-            // Проверка использует Collectibles, поэтому поле должно существовать
             if (Collectibles.Exists(c => c.Item.Name == "Ключи" && !c.IsPickedUp)) return;
 
             Item keyItem = new Item("Ключи", "Блестящие ключи от домика", Color.Gold);
@@ -339,7 +343,7 @@ namespace NeighborlyHelp
     public class MailBoxOption
     {
         public Rectangle Bounds { get; set; }
-        public string Number { get; set; } = ""; // Исправлено: был пробел " "
+        public string Number { get; set; } = ""; 
         public bool IsCorrect { get; set; }
     }
 }
