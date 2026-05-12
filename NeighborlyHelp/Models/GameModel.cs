@@ -132,8 +132,14 @@ namespace NeighborlyHelp
             GameObjects.Add(new Wall(GameField.Width - 10, 0, 10, GameField.Height));
 
             // Настройка таймера для скрытия подсказок взаимодействия через 2 секунды
+            // В GameModel.cs, внутри метода Initialize():
+
             HintTimer = new Timer { Interval = 2000 };
-            HintTimer.Tick += (s, e) => { InteractionHint = " "; NotifyChanged(); };
+            HintTimer.Tick += (s, e) =>
+            {
+                InteractionHint = ""; // Очищаем текст
+                NotifyChanged();      // ВАЖНО: Сообщаем контроллеру, что нужно перерисовать экран
+            };
 
             // Попытка загрузки изображения концовки по абсолютному пути для отладки
             string absolutePath = @"E:\ProjectsC#\NeighborlyHelp\NeighborlyHelp\NeighborlyHelp\Assets\end.png";

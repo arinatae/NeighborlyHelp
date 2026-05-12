@@ -8,7 +8,7 @@ namespace NeighborlyHelp.Models
 
         public Bench(int x, int y) : base(x, y, 180, 90)
         {
-            IsSolid = true;
+            IsSolid = false;
         }
 
         public override void Draw(Graphics g)

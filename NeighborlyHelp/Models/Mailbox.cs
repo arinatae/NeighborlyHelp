@@ -8,7 +8,7 @@ namespace NeighborlyHelp.Models
 
         public Mailbox(int x, int y) : base(x, y, 140, 160)
         {
-            IsSolid = true;
+            IsSolid = false;
         }
 
         public override void Draw(Graphics g)

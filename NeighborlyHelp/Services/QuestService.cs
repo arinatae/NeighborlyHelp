@@ -56,7 +56,7 @@ namespace NeighborlyHelp.Services
 		{
 			_model.RemoveNPC("Шарлотта"); 
 			_model.CurrentGameState = GameState.Quest2_Spawn;
-			_model.SpawnNPC("Оливер", 600, 400, new List<string>
+			_model.SpawnNPC("Оливер", 400, 400, new List<string>
 			{
 				"Привет, соседка! Ты сегодня просто сияешь ярче солнышка! Я правда очень рад тебя видеть",
 				"Слушай, мне неловко тебя просить, но... Не могла бы ты оказать мне одну услугу? Дело в том, что мне нужно срочно забрать посылку с почты. Но я сейчас очень занят, бегу по делам!",
@@ -81,7 +81,7 @@ namespace NeighborlyHelp.Services
 			_model.RemoveNPC("Мелисса");
 			_model.CurrentGameState = GameState.Quest4_Spawn;
 			_model.GameObjects.Add(new Radio(800, 400));
-			_model.SpawnNPC("Ричард", 600, 300, new List<string>
+			_model.SpawnNPC("Ричард", 500, 300, new List<string>
 			{
 				"Ой, это ты! Спасибо, что пришла. Я помню что мы должны были сегодня слушать музыку, но у меня тут некая проблема с радио...",
 				"Ты видишь, оно совсем не хочет ловить нужную частоту. Ты случайно не разбираешься в радиотехнике?",

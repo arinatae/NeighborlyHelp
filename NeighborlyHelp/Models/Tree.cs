@@ -9,7 +9,7 @@ namespace NeighborlyHelp.Models
         // Жестко задаем размеры как в оригинале
         public Tree(int x, int y) : base(x, y, 195, 200)
         {
-            IsSolid = true;
+            IsSolid = false;
         }
 
         public override void Draw(Graphics g)

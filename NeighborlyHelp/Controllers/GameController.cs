@@ -51,16 +51,6 @@ namespace NeighborlyHelp
             // Генерация начального уровня через фабрику
             LevelFactory.GenerateLevel(_model);
 
-            // Подписка на таймер подсказок взаимодействия (скрытие подсказки через время)
-            if (_model.HintTimer != null)
-            {
-                _model.HintTimer.Tick += (s, e) =>
-                {
-                    _model.InteractionHint = " ";
-                    _view.InvalidateView();
-                };
-            }
-
             // Запуск начальной сюжетной линии
             _questService.StartStory();
             _view.InvalidateView();
@@ -432,20 +422,23 @@ namespace NeighborlyHelp
                     // Проверка дистанции до предмета
                     if (!_model.IsCloseTo(item.Bounds))
                     {
-                        _model.InteractionHint = "Подойдите ближе!";
-                        _model.HintTimer.Stop();
-                        _model.HintTimer.Start();
+                        //_model.InteractionHint = "Подойдите ближе!";
+                        if (_model.HintTimer != null)
+                        {
+                            _model.HintTimer.Stop(); // Сброс таймера, если он уже тикал
+                            _model.HintTimer.Start(); // Запуск отсчета 2 секунд заново
+                        }
                         _view.InvalidateView();
                         return;
                     }
 
                     item.IsPickedUp = true;
-                    _model.InteractionHint = " ";
+                    _model.InteractionHint = "";
 
                     // Специфическая логика для квеста с ключами
                     if (_model.CurrentGameState == GameState.Quest1_Find && item.Item.Name == "Ключи")
                     {
-                        _view.ShowMessage("Нашёл ключи! Отнеси их Миле.", "Находка");
+                        _view.ShowMessage("Нашёл ключи! Отнеси их Шарлотте.", "Находка");
                         _model.CurrentGameState = GameState.Quest1_Return;
                     }
                     return;
@@ -466,7 +459,7 @@ namespace NeighborlyHelp
                     // Проверка дистанции до NPC
                     if (!_model.IsCloseTo(npc.Bounds))
                     {
-                        _model.InteractionHint = "Подойдите ближе!";
+                        //_model.InteractionHint = "Подойдите ближе!";
                         if (_model.HintTimer != null)
                         {
                             _model.HintTimer.Stop();
