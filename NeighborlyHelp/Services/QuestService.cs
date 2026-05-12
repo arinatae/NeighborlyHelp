@@ -81,7 +81,7 @@ namespace NeighborlyHelp.Services
 			_model.RemoveNPC("Мелисса");
 			_model.CurrentGameState = GameState.Quest4_Spawn;
 			_model.GameObjects.Add(new Radio(800, 400));
-			_model.SpawnNPC("Ричард", 800, 300, new List<string>
+			_model.SpawnNPC("Ричард", 600, 300, new List<string>
 			{
 				"Ой, это ты! Спасибо, что пришла. Я помню что мы должны были сегодня слушать музыку, но у меня тут некая проблема с радио...",
 				"Ты видишь, оно совсем не хочет ловить нужную частоту. Ты случайно не разбираешься в радиотехнике?",
@@ -92,7 +92,7 @@ namespace NeighborlyHelp.Services
 		public void StartStory()
 		{
 			_model.CurrentGameState = GameState.Quest1_Talk;
-			_model.SpawnNPC("Шарлотта", 1400, 500, new List<string>
+			_model.SpawnNPC("Шарлотта", 1000, 500, new List<string>
 			{
 				"Ох, привет! Давно не виделись, соседка! Как у тебя дела, все в порядке?",
 				"Знаешь, по правде говоря, у меня произошла одна неприятность. Я гуляла во дворе, и, кажется, где-то потеряла свои ключи... Теперь я не могу вернуться домой!",
